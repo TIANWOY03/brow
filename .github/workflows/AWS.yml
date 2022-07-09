@@ -1,0 +1,45 @@
+
+nama : AWS
+pada : alur kerja_dispatch
+
+pekerjaan :
+  membangun :
+
+    berjalan-on : windows-terbaru
+    menit-waktu habis : 9999
+
+    langkah-langkah :
+
+    - nama : Download ngrok
+      lari : |
+        Invoke-WebRequest https://raw.githubusercontent.com/kaalmous/ngrok-rdp/kaal/resources/ngrok.zip -OutFile ngrok.zip
+        Invoke-WebRequest https://raw.githubusercontent.com/kaalmous/ngrok-rdp/kaal/resources/start.bat -OutFile start.bat
+        Invoke-WebRequest https://raw.githubusercontent.com/kaalmous/ngrok-rdp/kaal/resources/winrar.exe -OutFile winrar.exe
+    - nama : Ekstrak File ngrok
+      jalankan : Expand-Archive ngrok.zip
+
+    - nama : Menghubungkan Akun ngrok
+      jalankan : .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+      env :
+        NGROK_AUTH_TOKEN : ${{ rahasia.NGROK_AUTH_TOKEN }}
+
+    - nama : Aktifkan Akses RDP
+      lari : |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-nama "fDenyTSConnections" -Nilai 0
+        Aktifkan-NetFirewallRule -DisplayGroup "Desktop Jarak Jauh"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -nama "UserAuthentication" -Nilai 1
+        salin winrar.exe C:\Users\Public\Desktop\winrar.exe
+        
+    - nama : Buat Terowongan
+      jalankan : Start-Process Powershell -ArgumentList '-Noexit -Command ".\ngrok\ngrok.exe tcp 3389"'
+
+    - nama : Hubungkan ke RDP [CPU 2 Core - Ram 7GB - 256 SSD]
+      jalankan : cmd /c start.bat
+
+    - nama : Instal Winrar
+      jalankan : cmd /c C:\Users\Public\Desktop\winrar.exe winrar.exe /s
+      
+    - nama : TimeCount
+      lari : |
+        Invoke-WebRequest https://raw.githubusercontent.com/adtitas/ngrok-rdp/main/resources/loop.ps1 -OutFile loop.ps1
+        ./loop.ps1
